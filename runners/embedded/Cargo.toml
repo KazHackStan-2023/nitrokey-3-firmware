@@ -54,7 +54,7 @@ serde = { version = "1", features = ["derive"] }
 utils = { path = "../../components/utils", features = ["build"] }
 
 [features]
-default = ["alloc"]
+default = ["alloc", "log-rtt"]
 
 test = ["apps/nk3-test", "utils/test"]
 develop = ["no-encrypted-storage", "apps/no-reset-time-window", "log-traceP"]

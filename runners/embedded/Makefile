@@ -41,7 +41,7 @@ NO_DELOG_FEATURE=$(shell python3 -c "print('no-delog') if 'no-delog' not in '$(F
 RAW_OUT = $(CARGO_TARGET_DIR)/$(TARGET)/$(CUSTOM_PROFILE)/$(SOC)_runner
 
 # feature definition
-BUILD_FEATURES := board-$(BOARD),$(FEATURES),$(NO_DELOG_FEATURE),$(LITTLEFS_INTRINSICS_FEATURE)
+BUILD_FEATURES := board-$(BOARD),log-rtt,$(FEATURES)$(LITTLEFS_INTRINSICS_FEATURE)
 
 .PHONY: list build build-all reset program check doc check-all clean clean-all check-env set-vars lint-all lint
 

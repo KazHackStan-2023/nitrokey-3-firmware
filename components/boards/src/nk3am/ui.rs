@@ -131,11 +131,11 @@ impl rgb_led::RgbLed for RgbLed {
             let p1 = nrf52840_hal::gpio::p1::Parts::new(pac.P1);
 
             // red
-            p0.p0_09.into_push_pull_output(Level::Low).degrade();
+            p0.p0_08.into_push_pull_output(Level::Low).degrade();
             // green
-            p0.p0_10.into_push_pull_output(Level::High).degrade();
+            p1.p1_09.into_push_pull_output(Level::High).degrade();
             // blue
-            p1.p1_02.into_push_pull_output(Level::High).degrade();
+            p0.p0_12.into_push_pull_output(Level::High).degrade();
         }
     }
 
