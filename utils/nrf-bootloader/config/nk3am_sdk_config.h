@@ -176,5 +176,13 @@
 #define NRF_DFU_SAVE_PROGRESS_IN_FLASH 0
 #endif
 
+#ifndef NRFX_CLOCK_CONFIG_LF_SRC
+#define NRFX_CLOCK_CONFIG_LF_SRC 1
+#endif
+
+#ifndef CLOCK_CONFIG_LF_SRC
+#define CLOCK_CONFIG_LF_SRC 1
+#endif
+
 #endif //NK_SDK_CONFIG_H
 
