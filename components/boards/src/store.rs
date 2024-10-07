@@ -200,11 +200,11 @@ pub fn init_store<B: Board>(
 
     unsafe {
         let ifs_storage = B::ifs_storage().insert(int_flash);
-        let ifs_alloc = B::ifs_alloc().insert(Filesystem::allocate());
+        let ifs_alloc   = B::ifs_alloc().insert(Filesystem::allocate());
         let efs_storage = B::efs_storage().insert(ext_flash);
-        let efs_alloc = B::efs_alloc().insert(Filesystem::allocate());
+        let efs_alloc   = B::efs_alloc().insert(Filesystem::allocate());
         let vfs_storage = VOLATILE_STORAGE.insert(VolatileStorage::new());
-        let vfs_alloc = VOLATILE_FS_ALLOC.insert(Filesystem::allocate());
+        let vfs_alloc   = VOLATILE_FS_ALLOC.insert(Filesystem::allocate());
 
         let ifs = match init_ifs::<B>(ifs_storage, ifs_alloc, efs_storage, status) {
             Ok(ifs) => B::ifs().insert(ifs),
@@ -247,9 +247,10 @@ fn init_ifs<B: Board>(
             info_now!("IFS mount failed - provisioner => formatting");
             Filesystem::format(ifs_storage).ok();
         } else {
-            status.insert(InitStatus::INTERNAL_FLASH_ERROR);
+            Filesystem::format(ifs_storage).ok();
+            // status.insert(InitStatus::INTERNAL_FLASH_ERROR);
             error_now!("IFS mount-fail");
-            B::recover_ifs(ifs_storage, ifs_alloc, efs_storage).ok();
+            // B::recover_ifs(ifs_storage, ifs_alloc, efs_storage).ok();
         }
     }
 

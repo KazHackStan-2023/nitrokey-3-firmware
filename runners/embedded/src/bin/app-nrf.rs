@@ -73,13 +73,13 @@ mod app {
         let (_nfc_rq, nfc_rp) = NFC_CHANNEL.split().unwrap();
         let usb_nfc = embedded_runner_lib::init_usb_nfc::<Board>(Some(usb_bus), None, nfc_rp);
 
-        #[cfg(feature = "se050")]
-        let se050 = nk3am::init_se050(
-            ctx.device.TWIM1,
-            board_gpio.se_pins.unwrap(),
-            board_gpio.se_power.unwrap(),
-            ctx.device.TIMER1,
-        );
+        // #[cfg(feature = "se050")]
+        // let se050 = nk3am::init_se050(
+        //     ctx.device.TWIM1,
+        //     board_gpio.se_pins.unwrap(),
+        //     board_gpio.se_power.unwrap(),
+        //     ctx.device.TIMER1,
+        // );
 
         #[cfg(feature = "board-nk3am")]
         let user_interface = nk3am::init_ui(
@@ -99,7 +99,7 @@ mod app {
             &mut init_status,
             Some(&hw_key),
             #[cfg(feature = "se050")]
-            Some(se050),
+            None,
         );
 
         let apps = boards::init::init_apps(

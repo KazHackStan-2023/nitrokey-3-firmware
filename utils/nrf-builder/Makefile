@@ -130,7 +130,7 @@ dev-deploy:
 
 fast-deploy:
 	$(MAKE) flash-bootloader
-	$(MAKE) flash-release
+	$(MAKE) flash-develop
 
 clean:
 	rm -rf $(ALL_ARTIFACTS)

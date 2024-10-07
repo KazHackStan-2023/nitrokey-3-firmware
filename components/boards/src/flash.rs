@@ -12,7 +12,7 @@ struct FlashProperties {
 
 const FLASH_PROPERTIES: FlashProperties = FlashProperties {
     size: 0x20_0000,
-    jedec: [0xc8, 0x40, 0x15],
+    jedec: [0x85, 0x60, 0x16],
     _cont: 0, /* should be 6, but device doesn't report those */
 };
 
@@ -110,17 +110,21 @@ where
 
     pub fn try_new(mut spim: SPI, mut cs: CS) -> Option<Self> {
         Self::selftest(&mut spim, &mut cs);
-
+        rtt_target::rprintln!("flash before init");
         let mut flash = spi_memory::series25::Flash::init(spim, cs).ok()?;
+        rtt_target::rprintln!("flash after init");
         let jedec_id = flash.read_jedec_id().ok()?;
+        rtt_target::rprintln!("flash after jedec id");
         info!("Ext. Flash: {:?}", jedec_id);
         if jedec_id.mfr_code() != FLASH_PROPERTIES.jedec[0]
             || jedec_id.device_id() != &FLASH_PROPERTIES.jedec[1..]
         {
+            rtt_target::rprintln!("NONE: DEVICE_ID == {:?}, MFR_CODE == {:?}", jedec_id.device_id(), jedec_id.mfr_code());
             error_now!("Unknown Ext. Flash: {:?}", jedec_id);
             None
         } else {
             let s25flash = RefCell::new(flash);
+            rtt_target::rprintln!("SOME: s25flash",);
             Some(Self { s25flash })
         }
     }

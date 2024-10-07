@@ -5,14 +5,9 @@ use littlefs2::{
 use memory_regions::MemoryRegions;
 use nfc_device::traits::nfc::{Device as NfcDevice, Error as NfcError, State as NfcState};
 use nrf52840_hal::{
-    gpio::{p0, p1, Level, Output, Pin, PushPull},
-    gpiote::Gpiote,
-    prelude::OutputPin as _,
-    spim,
-    timer::Timer,
-    twim, Spim, Twim,
+    gpio::{p0, p1, Level, Output, Pin, PushPull}, gpiote::Gpiote, prelude::OutputPin as _, spi::Spi, spim, spi, timer::Timer, twim, Spim, Twim
 };
-use nrf52840_pac::{FICR, GPIOTE, P0, P1, POWER, PWM0, PWM1, PWM2, SPIM3, TIMER1, TWIM1};
+use nrf52840_pac::{FICR, GPIOTE, P0, P1, POWER, PWM0, PWM1, PWM2, SPI0, SPIM3, TIMER1, TWIM1};
 
 use crate::{
     flash::ExtFlashStorage,
@@ -130,8 +125,8 @@ pub struct BoardGPIO {
     pub touch: OutPin,
 
     /* Secure Element (through TWIM1) */
-    pub se_pins: Option<twim::Pins>,
-    pub se_power: Option<OutPin>,
+    // pub se_pins: Option<twim::Pins>,
+    // pub se_power: Option<OutPin>,
 
     /* External Flash & NFC (through SxPIM3) */
     pub flashnfc_spi: Option<spim::Pins>,
@@ -149,29 +144,32 @@ pub fn init_pins(gpiote: GPIOTE, p0: P0, p1: P1) -> BoardGPIO {
     gpio_p0.p0_06.into_push_pull_output(Level::Low).degrade();
 
     /* RGB LED */
-    let led_r = gpio_p0.p0_09.into_push_pull_output(Level::Low).degrade();
-    let led_g = gpio_p0.p0_10.into_push_pull_output(Level::Low).degrade();
-    let led_b = gpio_p1.p1_02.into_push_pull_output(Level::Low).degrade();
+    let led_r = gpio_p0.p0_08.into_push_pull_output(Level::Low).degrade();
+    let led_g = gpio_p1.p1_09.into_push_pull_output(Level::Low).degrade();
+    let led_b = gpio_p0.p0_12.into_push_pull_output(Level::Low).degrade();
 
     /* SE050 */
-    let se_pwr = gpio_p1.p1_10.into_push_pull_output(Level::Low).degrade();
-    let se_scl = gpio_p1.p1_15.into_floating_input().degrade();
-    let se_sda = gpio_p0.p0_02.into_floating_input().degrade();
+    // let se_pwr = gpio_p1.p1_10.into_push_pull_output(Level::Low).degrade();
+    // let se_scl = gpio_p1.p1_15.into_floating_input().degrade();
+    // let se_sda = gpio_p0.p0_02.into_floating_input().degrade();
 
-    let se_pins = twim::Pins {
-        scl: se_scl,
-        sda: se_sda,
-    };
+    // let se_pins = twim::Pins {
+        // scl: se_scl,
+        // sda: se_sda,
+    // };
 
     /* Ext. Flash SPI */
     // Flash WP# gpio_p0.p0_22
     // Flash HOLD# gpio_p0.p0_23
-    let flash_spi_cs = gpio_p0.p0_24.into_push_pull_output(Level::High).degrade();
-    let flash_spi_clk = gpio_p1.p1_06.into_push_pull_output(Level::Low).degrade();
-    let flash_spi_mosi = gpio_p1.p1_04.into_push_pull_output(Level::Low).degrade();
-    let flash_spi_miso = gpio_p1.p1_00.into_floating_input().degrade();
+    let flash_spi_mosi = gpio_p0.p0_22.into_push_pull_output(Level::Low).degrade();
+    let flash_spi_miso = gpio_p0.p0_20.into_floating_input().degrade();
+    let flash_spi_clk  = gpio_p0.p0_24.into_push_pull_output(Level::Low).degrade();
+    let flash_spi_cs   = gpio_p1.p1_01.into_push_pull_output(Level::High).degrade();
     //let _flash_wp = gpio_p0.p0_22.into_push_pull_output(Level::Low).degrade();
     //let _flash_hold = gpio_p0.p0_23.into_push_pull_output(Level::High).degrade();
+
+    gpio_p1.p1_04.into_push_pull_output(Level::High);
+    gpio_p1.p1_02.into_push_pull_output(Level::High);
 
     let flash_spi = spim::Pins {
         sck: flash_spi_clk,
@@ -185,8 +183,8 @@ pub fn init_pins(gpiote: GPIOTE, p0: P0, p1: P1) -> BoardGPIO {
         gpiote,
         rgb_led: [led_r, led_g, led_b],
         touch,
-        se_pins: Some(se_pins),
-        se_power: Some(se_pwr),
+        // se_pins: Some(se_pins),
+        // se_power: Some(se_pwr),
         flashnfc_spi: Some(flash_spi),
         flash_cs: Some(flash_spi_cs),
     }
@@ -210,7 +208,7 @@ pub fn init_ui(
 }
 
 pub fn init_external_flash(spim3: SPIM3, spi: spim::Pins, cs: OutPin) -> ExternalFlashStorage {
-    let spim = Spim::new(spim3, spi, spim::Frequency::M2, spim::MODE_0, 0x00u8);
+    let spim = Spim::new(spim3, spi, spim::Frequency::M4, spim::MODE_0,0x00u8);
     ExtFlashStorage::try_new(spim, cs).unwrap()
 }
 
