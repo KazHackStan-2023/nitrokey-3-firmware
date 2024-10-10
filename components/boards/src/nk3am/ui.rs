@@ -1,4 +1,4 @@
-use nrf52840_hal::{gpio::Level, pac, prelude::InputPin, pwm, pwm::Pwm};
+use nrf52840_hal::{gpio::{self, Level}, pac, prelude::InputPin, pwm::{self, Pwm}};
 use trussed::platform::consent;
 
 use super::OutPin;
@@ -61,10 +61,11 @@ impl Press for HardwareButtons {
                             }
                         }
                     },
-                }
+
             }
             self.touch_button = Some(floating.into_push_pull_output(Level::High));
         }
+        rtt_target::rprintln!("ticks: {:?}", ticks);
         ticks >= need_ticks
     }
 }

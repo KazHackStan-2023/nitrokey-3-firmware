@@ -27,7 +27,7 @@ mod migrations;
 type OutPin = Pin<Output<PushPull>>;
 
 const MEMORY_REGIONS: &MemoryRegions = &MemoryRegions::NK3AM;
-
+use utils::OptionalStorage;
 pub struct NK3AM;
 
 impl Board for NK3AM {
@@ -95,7 +95,7 @@ impl Board for NK3AM {
 
 pub type InternalFlashStorage =
     FlashStorage<{ MEMORY_REGIONS.filesystem.start }, { MEMORY_REGIONS.filesystem.end }>;
-pub type ExternalFlashStorage = ExtFlashStorage<Spim<SPIM3>, OutPin>;
+pub type ExternalFlashStorage = OptionalStorage<ExtFlashStorage<Spim<SPIM3>, OutPin>>;
 
 impl_storage_pointers!(
     NK3AM,
@@ -123,6 +123,7 @@ pub struct BoardGPIO {
     /* interactive elements */
     pub rgb_led: [OutPin; 3],
     pub touch: OutPin,
+    pub test: OutPin,
 
     /* Secure Element (through TWIM1) */
     // pub se_pins: Option<twim::Pins>,
@@ -140,9 +141,13 @@ pub fn init_pins(gpiote: GPIOTE, p0: P0, p1: P1) -> BoardGPIO {
 
     /* touch sensor */
     let touch = gpio_p0.p0_04.into_push_pull_output(Level::High).degrade();
-    // not used, just ensure output + low
-    gpio_p0.p0_06.into_push_pull_output(Level::Low).degrade();
+    let test = gpio_p0.p0_31.into_push_pull_output(Level::High).degrade();
 
+    // not used, just ensure output + low
+    gpio_p0.p0_05.into_floating_input().degrade();
+    gpio_p0.p0_06.into_push_pull_output(Level::Low).degrade();
+    
+// AIN2 -> AIN7
     /* RGB LED */
     let led_r = gpio_p0.p0_08.into_push_pull_output(Level::Low).degrade();
     let led_g = gpio_p1.p1_09.into_push_pull_output(Level::Low).degrade();
@@ -183,6 +188,7 @@ pub fn init_pins(gpiote: GPIOTE, p0: P0, p1: P1) -> BoardGPIO {
         gpiote,
         rgb_led: [led_r, led_g, led_b],
         touch,
+        test,
         // se_pins: Some(se_pins),
         // se_power: Some(se_pwr),
         flashnfc_spi: Some(flash_spi),
@@ -209,7 +215,8 @@ pub fn init_ui(
 
 pub fn init_external_flash(spim3: SPIM3, spi: spim::Pins, cs: OutPin) -> ExternalFlashStorage {
     let spim = Spim::new(spim3, spi, spim::Frequency::M4, spim::MODE_0,0x00u8);
-    ExtFlashStorage::try_new(spim, cs).unwrap()
+    // ExtFlashStorage::try_new(spim, cs).unwrap()
+    OptionalStorage::default()
 }
 
 pub fn init_se050(
