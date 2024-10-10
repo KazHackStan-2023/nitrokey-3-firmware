@@ -11,8 +11,8 @@ struct FlashProperties {
 }
 
 const FLASH_PROPERTIES: FlashProperties = FlashProperties {
-    size: 0x20_0000,
-    jedec: [0x85, 0x60, 0x16],
+    size: 0x10_0000,
+    jedec: [0xc8, 0x40, 0x14],
     _cont: 0, /* should be 6, but device doesn't report those */
 };
 
